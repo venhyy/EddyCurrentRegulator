@@ -13,3 +13,21 @@ C:\Users\Jarda\source\repos\ECR Utility\ECR Utility\obj\Debug\ECR Utility.csproj
 C:\Users\Jarda\source\repos\ECR Utility\ECR Utility\obj\Debug\ECR Utility.csproj.CoreCompileInputs.cache
 C:\Users\Jarda\source\repos\ECR Utility\ECR Utility\obj\Debug\ECR Utility.exe
 C:\Users\Jarda\source\repos\ECR Utility\ECR Utility\obj\Debug\ECR Utility.pdb
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\ECR Utility.csproj.AssemblyReference.cache
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\MainWindow.g.cs
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\App.g.cs
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\ECR Utility_MarkupCompile.cache
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\ECR Utility_MarkupCompile.lref
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\ECR Utility.exe
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\ECR Utility.pdb
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\bin\Debug\ECR Utility.exe.config
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\bin\Debug\ECR Utility.exe
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\bin\Debug\ECR Utility.pdb
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\MainWindow.baml
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\ECR Utility.g.resources
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\ECR_Utility.Properties.Resources.resources
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\ECR Utility.csproj.GenerateResource.cache
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\ECR Utility.csproj.CoreCompileInputs.cache
+C:\Users\Jarda\Documents\GitHub\EddyCurrentRegulator\APP\ECR Utility\ECR Utility\obj\Debug\ECR Utility.csproj.CopyComplete

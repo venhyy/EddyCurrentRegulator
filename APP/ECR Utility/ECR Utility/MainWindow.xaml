@@ -71,13 +71,13 @@
                     <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Column="0" Grid.Row="0" Text="Setpoint" Margin="5" FontSize="15px" VerticalAlignment="Center" ToolTip="Žádaná hodnota na výstupu"></TextBlock>
-                <TextBox Grid.Column="1" Grid.Row="0" Width="50" Height="20" Margin="15,0,0,0" TextAlignment="Center">1500</TextBox>
+                <TextBox x:Name="setpoint" Grid.Column="1" Grid.Row="0" Width="50" Height="20" Margin="15,0,0,0" TextAlignment="Center">1500</TextBox>
                 <TextBlock Grid.Column="0" Grid.Row="1" Text="Kp" Margin="5" FontSize="15px" VerticalAlignment="Center" ToolTip="Konstanta zesílení PID"></TextBlock>
-                <TextBox Grid.Column="1" Grid.Row="1" Width="50" Height="20" Margin="15,0,0,0" TextAlignment="Center">10</TextBox>
+                <TextBox x:Name="kp" Grid.Column="1" Grid.Row="1" Width="50" Height="20" Margin="15,0,0,0" TextAlignment="Center">10</TextBox>
                 <TextBlock Grid.Column="0" Grid.Row="2" Text="Ki" Margin="5" FontSize="15px" VerticalAlignment="Center" ToolTip="Integrační konstata PID"></TextBlock>
-                <TextBox Grid.Column="1" Grid.Row="2" Width="50" Height="20" Margin="15,0,0,0" TextAlignment="Center">30</TextBox>
+                <TextBox x:Name="ki" Grid.Column="1" Grid.Row="2" Width="50" Height="20" Margin="15,0,0,0" TextAlignment="Center">30</TextBox>
                 <TextBlock Grid.Column="0" Grid.Row="3" Text="Kd" Margin="5" FontSize="15px" VerticalAlignment="Center" ToolTip="Derivační konstata PID"></TextBlock>
-                <TextBox Grid.Column="1" Grid.Row="3" Width="50" Height="20" Margin="15,0,0,0" TextAlignment="Center">0</TextBox>
+                <TextBox x:Name="kd" Grid.Column="1" Grid.Row="3" Width="50" Height="20" Margin="15,0,0,0" TextAlignment="Center">0</TextBox>
             </Grid>
         </GroupBox>
 
@@ -95,7 +95,7 @@
                 </Grid.RowDefinitions>
 
                 <Button Grid.Column="0" Grid.Row="0" Width="100" Height="25" Margin="0,10,0,5" Content="Načíst"></Button>
-                <Button Grid.Column="0" Grid.Row="1" Width="100" Height="25" Margin="0,0,0,5" Content="Nastavit"></Button>
+                <Button x:Name="setParameters" Grid.Column="0" Grid.Row="1" Width="100" Height="25" Margin="0,0,0,5" Content="Nastavit" Click="setParameters_Click"></Button>
                 <Button Grid.Column="0" Grid.Row="2" Width="100" Height="25" Margin="0,0,0,5" Content="Start"></Button>
                 <Button Grid.Column="0" Grid.Row="3" Width="100" Height="25" Margin="0,0,0,5" Content="Stop"></Button>
                 

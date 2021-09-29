@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO.Ports;
 using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 
 namespace ECR_Utility
 {
@@ -24,16 +25,26 @@ namespace ECR_Utility
     {
 
         System.IO.Ports.SerialPort serialPort = null;
+        PID pid = new PID();
         public MainWindow()
         {
             InitializeComponent();
             SelPort();
         }
-        
+
         public class ComPort
         {
             public string DeviceID { get; set; }
             public string Description { get; set; }
+        }
+
+        public class PID
+        {
+            public int Setpoint { get; set; }
+            public int Kp { get; set; }
+            public int Ki { get; set; }
+            public int Kd { get; set; }
+          
         }
 
         private void SelPort()
@@ -66,7 +77,7 @@ namespace ECR_Utility
                     serialPort = new SerialPort
                     {
                         PortName = port,
-                        BaudRate = 115200,
+                        BaudRate = 9600,
                         DataBits = 8,
                         Parity = Parity.None,
                         StopBits = StopBits.One,
@@ -84,12 +95,12 @@ namespace ECR_Utility
                         serialPort.Open();
                         if (serialPort.IsOpen)
                         {
-                            MessageBox.Show("Připojeno","ECR Utility", MessageBoxButton.OK, MessageBoxImage.Information);
+                            MessageBox.Show("Připojeno", "ECR Utility", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
 
                         serialPort.WriteLine("E-10-ACK");
 
-                        
+
 
                     }
                     catch (Exception ex)
@@ -109,6 +120,8 @@ namespace ECR_Utility
             // Show in the textbox
             try
             {
+                var inp = serialPort.ReadLine();
+                Console.WriteLine(inp);
                 /*channel1Value.Dispatcher.Invoke(
                     new Action(() =>
                     {
@@ -125,17 +138,39 @@ namespace ECR_Utility
                     })
                 );*/
             }
-            catch(Exception exp)
+            catch (Exception exp)
             {
-              /*  receiveText.Dispatcher.Invoke(
-                    new Action(() =>
-                    {
-                        receiveText.Text = "!Error! cannot connect" + serialPort.PortName;
-                    })
-                );*/
+                /*  receiveText.Dispatcher.Invoke(
+                      new Action(() =>
+                      {
+                          receiveText.Text = "!Error! cannot connect" + serialPort.PortName;
+                      })
+                  );*/
 
                 MessageBox.Show(exp.ToString());
             }
         }
+
+        private void setParameters_Click(object sender, RoutedEventArgs e)
+        {
+            if (serialPort != null && serialPort.IsOpen) {
+
+                pid.Setpoint = Convert.ToInt32(setpoint.Text);
+                pid.Kp = Convert.ToInt32(kp.Text);
+                pid.Ki = Convert.ToInt32(ki.Text);
+                pid.Kd = Convert.ToInt32(kd.Text);
+
+                string json = JsonConvert.SerializeObject(pid);
+
+                serialPort.WriteLine(json);
+            }
+
+                
+            
+        }
     }
-}
+
+
+    }
+    
+
