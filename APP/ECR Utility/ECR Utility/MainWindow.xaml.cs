@@ -40,11 +40,12 @@ namespace ECR_Utility
 
         public class PID
         {
-            public int Setpoint { get; set; }
-            public int Kp { get; set; }
-            public int Ki { get; set; }
-            public int Kd { get; set; }
-          
+            public double setpoint { get; set; }
+            public double kp { get; set; }
+            public double ki { get; set; }
+            public double kd { get; set; }
+            public double process_value { get; set; }
+
         }
 
         private void SelPort()
@@ -155,10 +156,10 @@ namespace ECR_Utility
         {
             if (serialPort != null && serialPort.IsOpen) {
 
-                pid.Setpoint = Convert.ToInt32(setpoint.Text);
-                pid.Kp = Convert.ToInt32(kp.Text);
-                pid.Ki = Convert.ToInt32(ki.Text);
-                pid.Kd = Convert.ToInt32(kd.Text);
+                pid.setpoint = Convert.ToDouble(setpoint.Text);
+                pid.kp = Convert.ToDouble(kp.Text);
+                pid.ki = Convert.ToDouble(ki.Text);
+                pid.kd = Convert.ToDouble(kd.Text);
 
                 string json = JsonConvert.SerializeObject(pid);
 
@@ -168,6 +169,7 @@ namespace ECR_Utility
                 
             
         }
+
     }
 
 
