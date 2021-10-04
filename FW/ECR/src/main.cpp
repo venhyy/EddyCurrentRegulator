@@ -8,6 +8,7 @@
 #include <ezOutput.h> // ezOutput library
 #include <PWM.h>
 #include <TimerFreeTone.h>
+#include <TM1637Display.h>
 
 #define FW_REV 10
 
@@ -21,20 +22,24 @@
 #define DEFAULT_STATE 255
 #define SHUTDOWN_TIME_TOTAL (180000UL)
 
+#define CLK PIN_PD1
+#define DIO PIN_PD0
+
 unsigned long freq;
 String inData;
 StaticJsonDocument<200> doc;
 
 //Define Variables we'll be connecting to
-double setpoint = 3333;
+double setpoint = 3540;
 double process_value, output;
 
 //Specify the links and initial tuning parameters
-double kp = 2, ki = 5, kd = 0;
+double kp = 0.5, ki = 1, kd = 0;
 PID myPID(&process_value, &output, &setpoint, kp, ki, kd, REVERSE);
 
 bool pid_enabled = false;
 bool shutdown = false;
+bool uartUsed = false;
 
 int buttonState = LOW; //this variable tracks the state of the button, low if not pressed, high if pressed
 
@@ -42,23 +47,36 @@ unsigned long lastDebounceTime = 0; // the last time the output pin was toggled
 unsigned long debounceDelay = 500;  // the debounce time; increase if the output flickers
 unsigned long shutdown_time = 0;
 
-unsigned long led_freq = 0;
-unsigned long period;
+ezOutput led(STATUS_LED);
+TM1637Display display(CLK, DIO);
 
 void setup()
 {
+
   pinMode(BTN, INPUT);
   pinMode(STATUS_LED, OUTPUT);
   pinMode(PWM_OUT_1, OUTPUT);
   digitalWrite(STATUS_LED, HIGH);
-  Serial.begin(9600);
+  if (digitalRead(BTN) == HIGH)
+  {
+    Serial.begin(9600);
+    uartUsed = true;
+  }
+  else
+    display.setBrightness(0x0f);
+
   myPID.SetMode(AUTOMATIC);
+  led.blink(500, 250);
+
+  output = DEFAULT_STATE;
 }
 
 void loop()
 {
 
   buttonState = digitalRead(BTN);
+  analogWrite(PWM_OUT_1, output);
+  display.showNumberDec(process_value, false);
 
   if ((millis() - lastDebounceTime) > debounceDelay)
   {
@@ -73,7 +91,6 @@ void loop()
     else if ((buttonState == HIGH) && (pid_enabled == true))
     {
 
-      digitalWrite(STATUS_LED, HIGH);
       pid_enabled = false;
       shutdown = true;
       shutdown_time = millis();
@@ -91,39 +108,43 @@ void loop()
   else if (shutdown == true && millis() - shutdown_time < SHUTDOWN_TIME_TOTAL)
   {
     output = 0;
+    led.loop();
   }
   else
   {
     output = DEFAULT_STATE;
+    digitalWrite(STATUS_LED, HIGH);
   }
 
-  if (Serial.available() > 0)
+  if (uartUsed)
   {
-
-    inData = Serial.readStringUntil('\n');
-    Serial.println("data: " + inData);
-
-    DeserializationError error = deserializeJson(doc, inData);
-
-    if (error)
+    Serial.printf("%d,%d,%d,%d,%d,%d,%lu,%lu\n", (int)kp, (int)ki, (int)kd, (int)setpoint, (int)process_value, (int)output);
+    if (Serial.available() > 0)
     {
-      Serial.print(F("deserialize failed: "));
-      Serial.println(error.f_str());
-    }
-    else
-    {
-      setpoint = doc["setpoint"];
-      kp = doc["kp"];
-      ki = doc["ki"];
-      kd = doc["kd"];
-      process_value = doc["process_value"];
 
-      myPID.SetTunings(kp, ki, kd);
-      Serial.printf("%d,%d,%d,%d,%d\n", (int)kp, (int)ki, (int)kd, (int)setpoint, (int)output);
-    }
+      inData = Serial.readStringUntil('\n');
+      Serial.println("data: " + inData);
 
-    inData = "";
+      DeserializationError error = deserializeJson(doc, inData);
+
+      if (error)
+      {
+        Serial.print(F("deserialize failed: "));
+        Serial.println(error.f_str());
+      }
+      else
+      {
+        setpoint = doc["setpoint"];
+        kp = doc["kp"];
+        ki = doc["ki"];
+        kd = doc["kd"];
+        process_value = doc["process_value"];
+
+        myPID.SetTunings(kp, ki, kd);
+        Serial.printf("%d,%d,%d,%d,%d\n", (int)kp, (int)ki, (int)kd, (int)setpoint, (int)output);
+      }
+
+      inData = "";
+    }
   }
-
-  Serial.printf("%d,%d,%d,%d,%d,%d,%lu,%lu\n", (int)kp, (int)ki, (int)kd, (int)setpoint, (int)process_value, (int)output, period, led_freq);
 }
