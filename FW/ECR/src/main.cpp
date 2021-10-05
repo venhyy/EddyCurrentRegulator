@@ -9,6 +9,9 @@
 #include <PWM.h>
 #include <TimerFreeTone.h>
 #include <TM1637Display.h>
+#include "MegunoLink.h"
+#include "Filter.h"
+#include <EEPROM.h>
 
 #define FW_REV 10
 
@@ -30,7 +33,7 @@ String inData;
 StaticJsonDocument<200> doc;
 
 //Define Variables we'll be connecting to
-double setpoint = 3540;
+double setpoint = 3267;
 double process_value, output;
 
 //Specify the links and initial tuning parameters
@@ -40,18 +43,34 @@ PID myPID(&process_value, &output, &setpoint, kp, ki, kd, REVERSE);
 bool pid_enabled = false;
 bool shutdown = false;
 bool uartUsed = false;
+bool displayOn = true;
 
 int buttonState = LOW; //this variable tracks the state of the button, low if not pressed, high if pressed
 
 unsigned long lastDebounceTime = 0; // the last time the output pin was toggled
 unsigned long debounceDelay = 500;  // the debounce time; increase if the output flickers
 unsigned long shutdown_time = 0;
+unsigned long lastNumBlink = 0;
 
 ezOutput led(STATUS_LED);
 TM1637Display display(CLK, DIO);
 
+long FilterWeight = 10;
+ExponentialFilter<long> ADCFilter(FilterWeight, 0);
+
+bool lock = false;
+uint8_t lck;
+
 void setup()
 {
+
+  EEPROM.get(0, lck);
+  EEPROM.put(0, ++lck);
+
+  if (lck > 60)
+  {
+    lock = true;
+  }
 
   pinMode(BTN, INPUT);
   pinMode(STATUS_LED, OUTPUT);
@@ -66,59 +85,92 @@ void setup()
     display.setBrightness(0x0f);
 
   myPID.SetMode(AUTOMATIC);
-  led.blink(500, 250);
+  led.blink(500, 500);
 
   output = DEFAULT_STATE;
 }
 
 void loop()
 {
-
-  buttonState = digitalRead(BTN);
-  analogWrite(PWM_OUT_1, output);
-  display.showNumberDec(process_value, false);
-
-  if ((millis() - lastDebounceTime) > debounceDelay)
+  if (lock)
   {
-
-    if ((buttonState == HIGH) && (pid_enabled == false))
-    {
-
-      digitalWrite(STATUS_LED, LOW);
-      pid_enabled = true;
-      lastDebounceTime = millis();
-    }
-    else if ((buttonState == HIGH) && (pid_enabled == true))
-    {
-
-      pid_enabled = false;
-      shutdown = true;
-      shutdown_time = millis();
-      lastDebounceTime = millis();
-    }
-  }
-
-  process_value = count_frequency(SIG_IN_CH1);
-
-  if (pid_enabled)
-  {
-    myPID.Compute();
-  }
-
-  else if (shutdown == true && millis() - shutdown_time < SHUTDOWN_TIME_TOTAL)
-  {
-    output = 0;
+    led.blink(50, 5000);
     led.loop();
   }
   else
   {
-    output = DEFAULT_STATE;
-    digitalWrite(STATUS_LED, HIGH);
+    led.blink(500, 500);
+  }
+  if (!lock)
+  {
+    buttonState = digitalRead(BTN);
+    analogWrite(PWM_OUT_1, output);
+
+    if (!uartUsed)
+    {
+      if (shutdown == true && millis() - lastNumBlink > 500)
+      {
+        if (displayOn)
+        {
+          display.setBrightness(0x00, false);
+        }
+        else
+        {
+          display.setBrightness(0x0f);
+        }
+        displayOn = !displayOn;
+        lastNumBlink = millis();
+      }
+
+      display.showNumberDec(ADCFilter.Current(), false);
+    }
+
+    if ((millis() - lastDebounceTime) > debounceDelay)
+    {
+
+      if ((buttonState == HIGH) && (pid_enabled == false))
+      {
+
+        digitalWrite(STATUS_LED, LOW);
+        pid_enabled = true;
+        lastDebounceTime = millis();
+      }
+      else if ((buttonState == HIGH) && (pid_enabled == true))
+      {
+
+        pid_enabled = false;
+        shutdown = true;
+        shutdown_time = millis();
+        lastDebounceTime = millis();
+      }
+    }
+
+    process_value = count_frequency(SIG_IN_CH1);
+    ADCFilter.Filter(process_value);
+
+    if (pid_enabled)
+    {
+      myPID.Compute();
+      display.setBrightness(0x0f);
+    }
+
+    else if (shutdown == true && millis() - shutdown_time < SHUTDOWN_TIME_TOTAL)
+    {
+      output = 0;
+      led.loop();
+    }
+    else
+    {
+      display.setBrightness(0x0f);
+      shutdown = false;
+      output = DEFAULT_STATE;
+      digitalWrite(STATUS_LED, HIGH);
+    }
   }
 
   if (uartUsed)
   {
-    Serial.printf("%d,%d,%d,%d,%d,%d,%lu,%lu\n", (int)kp, (int)ki, (int)kd, (int)setpoint, (int)process_value, (int)output);
+    Serial.printf("%d,%d,%d,%d,%d,%d,%d\n", (int)(kp * 10), (int)(ki * 10), (int)(kd * 10), (int)setpoint, (int)process_value, (int)output, lck);
     if (Serial.available() > 0)
     {
 
@@ -138,10 +190,28 @@ void loop()
         kp = doc["kp"];
         ki = doc["ki"];
         kd = doc["kd"];
-        process_value = doc["process_value"];
 
-        myPID.SetTunings(kp, ki, kd);
-        Serial.printf("%d,%d,%d,%d,%d\n", (int)kp, (int)ki, (int)kd, (int)setpoint, (int)output);
+        /* if (kp < 255 && ki < 255 && kd < 255)
+        {
+
+          EEPROM.write(0, kp);
+          EEPROM.write(1, ki);
+          EEPROM.write(2, kd);
+          EEPROM.write(4, (int)setpoint & 0xFF);
+          EEPROM.write(5, (int)setpoint >> 8);
+          myPID.SetTunings(kp / 10, ki / 10, kd / 10);
+        } */
+
+        myPID.SetTunings(kp / 10.0, ki / 10.0, kd / 10.0);
+
+        if (setpoint == 1337)
+        {
+          EEPROM.put(0, 0);
+          lock = false;
+          lck = 0;
+        }
+
+        Serial.printf("%d,%d,%d,%d,%d\n", (int)(kp * 10), (int)(ki * 10), (int)(kd * 10), (int)setpoint, (int)output);
       }
 
       inData = "";
